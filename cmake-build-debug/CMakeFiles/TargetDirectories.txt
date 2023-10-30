@@ -1,0 +1,3 @@
+/home/nickage/OneDrive-PSU/CMPSC_472/cmpsc472-project-1/cmake-build-debug/CMakeFiles/cmpsc472_project_1.dir
+/home/nickage/OneDrive-PSU/CMPSC_472/cmpsc472-project-1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/nickage/OneDrive-PSU/CMPSC_472/cmpsc472-project-1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
