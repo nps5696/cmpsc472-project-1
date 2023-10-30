@@ -1,5 +1,6 @@
 //
-// Created by Nikolay S on 10/29/23.
+// Created by Nikolay S. on 10/29/23.
+// CMPSC 472, Project - 1
 //
 
 #include <stdio.h>
@@ -13,6 +14,7 @@
 
 // setting max number of child processes
 #define MAX_CHILDREN 100
+// buffer for threads
 #define BUFFER_SIZE 5
 #define NUM_PRODUCERS 1
 #define NUM_CONSUMERS 2
@@ -44,7 +46,7 @@ void* producer(void* p_id) {
         in = (in + 1) % BUFFER_SIZE;
         sem_post(&mutex);
         sem_post(&data);
-        usleep((random_num() % 400 + 100) * 1000);  // sleep for random time 100-500ms
+        usleep((random_num() % 400 + 100) * 1000);  // sleep for time 100-500ms
     }
     return NULL;
 }
@@ -55,7 +57,7 @@ void* consumer(void* c_id) {
         sem_wait(&mutex);
 
         int item = buffer[out];
-        buffer[out] = 0;  // Resetting the consumed slot
+        buffer[out] = 0;  // releasing slot
         printf("Consumer %ld consumed %d. Buffer: ", (long)c_id, item);
         for (int j = 0; j < BUFFER_SIZE; j++) {
             printf("%d ", buffer[j]);
@@ -72,7 +74,7 @@ void* consumer(void* c_id) {
 
 void* thread_function(void* arg) {
     printf("Thread %ld started.\n", (long)arg);
-    sleep(15);  // Let the thread sleep for 3 seconds
+    sleep(15);  // thread sleeps for 15 seconds
     printf("Thread %ld finished.\n", (long)arg);
     return NULL;
 }
@@ -168,7 +170,7 @@ void proc_kill(int index) {
         return;
     }
 
-    // rewrite array removing killed pid
+    // rewriting array reassigning killed pid index
     kill(children[index-1], SIGTERM);
     waitpid(children[index-1], NULL, 0); // wait for child to terminate
 
@@ -228,13 +230,35 @@ void thread_sync() {
 
 void ipc_pipe_share() {
     printf("IPC using pipe function called.\n");
-    // TODO: Implement IPC using pipes
+
+    int pipefd[2];
+    char msg[] = "hey there, this is a message from child process!";
+    char buffer[256] = {0}; // buffer store for the message, init to 0 to fix unreadable trailing characters in the msg
+
+    if (pipe(pipefd) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+    // if we are child write msg to pipe
+    if (fork() == 0) {
+        close(pipefd[0]);
+        write(pipefd[1], msg, strlen(msg));
+        close(pipefd[1]);
+    } else {
+        // otherwise we are parent let read data from pipe
+        close(pipefd[1]);
+        read(pipefd[0], buffer, sizeof(buffer));
+        printf("Piped message: %s\n", buffer);
+        // close pipe
+        close(pipefd[0]);
+    }
 }
 
 int main() {
     int choice, index;
 
     while (1) {
+        // menu prompts
         printf("\nMenu:\n");
         printf("1. proc_create\n");
         printf("2. proc_list\n");
@@ -249,34 +273,29 @@ int main() {
         printf("\nEnter your choice: ");
         scanf("%d", &choice);
 
+        // menu switch/case logic
         switch (choice) {
             case 1:
-                proc_create(); // done
+                proc_create();
                 break;
             case 2:
-                proc_list(); // done
+                proc_list();
                 break;
             case 3:
                 printf("\nEnter index of child to monitor: ");
                 scanf("%d", &index);
-                proc_monit(index); // done
+                proc_monit(index);
                 break;
             case 4:
                 printf("\nEnter index of child to terminate: ");
                 scanf("%d", &index);
-                proc_kill(index); // done
+                proc_kill(index);
                 break;
             case 5:
                 thread_create();
                 break;
-//            case 6:
-//                thread_kill();
-//                printf("\nEnter index of child to terminate: ");
-//                scanf("%d", &index); // tmp holder will have to be replaced
-//                proc_kill(index);
-//                break;
             case 6:
-                thread_sync(); // done
+                thread_sync();
                 break;
             case 7:
                 ipc_pipe_share();
@@ -285,6 +304,7 @@ int main() {
                 exit(0);
                 break;
             default:
+                // catch all case
                 printf("Invalid choice. Try again.");
                 break;
         }
