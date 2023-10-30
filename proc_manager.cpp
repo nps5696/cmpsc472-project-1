@@ -275,13 +275,13 @@ int main() {
 //                scanf("%d", &index); // tmp holder will have to be replaced
 //                proc_kill(index);
 //                break;
-            case 7:
+            case 6:
                 thread_sync(); // done
                 break;
-            case 8:
+            case 7:
                 ipc_pipe_share();
                 break;
-            case 9:
+            case 8:
                 exit(0);
                 break;
             default:
