@@ -265,7 +265,6 @@ int main() {
         printf("3. proc_monit\n");
         printf("4. proc_kill\n");
         printf("5. thread_create\n");
-//        printf("6. thread_kill\n");
         printf("6. thread_sync\n");
         printf("7. ipc_pipe_share\n");
         printf("8. Exit\n");
